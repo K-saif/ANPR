@@ -1,0 +1,9 @@
+# RF-DETR Vehicle Detection Dependencies
+rfdetr
+supervision
+opencv-python
+torch
+torchvision
+Pillow
+numpy
+onnxruntime-gpu  # Use onnxruntime for CPU-only
