@@ -6,3 +6,9 @@
 /rf-detr-base.pth
 /rf-detr-nano.pth
 /tracked.mp4
+*.mp4
+*.pth
+*.pt
+*.onnx
+*.log
+*.txt
