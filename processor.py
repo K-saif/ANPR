@@ -6,6 +6,7 @@ from collections import defaultdict
 
 from vehicle_tracker import VehicleTracker
 from plate_detector import PlateDetector
+from plate_ocr import PlateOCR
 from visualizer import Visualizer
 from config import (
     DEFAULT_MODEL_PATH, DEFAULT_PLATE_MODEL_PATH,
@@ -33,11 +34,13 @@ class VideoProcessor:
         self.plate_counts = defaultdict(int)
         
         self.plate_detector = None
+        self.plate_ocr = None
         if enable_plates:
             try:
                 self.plate_detector = PlateDetector(
                     plate_model, plate_confidence, input_size, use_gpu
                 )
+                self.plate_ocr = PlateOCR(use_gpu=use_gpu)
                 os.makedirs(cropped_folder, exist_ok=True)
             except Exception as e:
                 print(f"Plate detector unavailable: {e}")
@@ -77,8 +80,21 @@ class VideoProcessor:
                         filename = f"{tid}_{count}_f{frame_num}.jpg"
                         path = os.path.join(self.cropped_folder, filename)
                         cv2.imwrite(path, plate_crop)
-                        results.append({'tracker_id': tid, 'vehicle_box': [x1, y1, x2, y2]})
-                        print(f"Plate #{tid} ({count}/{self.max_plate_detections}): {filename}")
+                        
+                        # Run OCR to extract plate text (Arabic + English)
+                        ocr_result = self.plate_ocr.extract_text(plate_crop)
+                        plate_text = ocr_result['text']
+                        
+                        results.append({
+                            'tracker_id': tid,
+                            'vehicle_box': [x1, y1, x2, y2],
+                            'plate_text': plate_text,
+                            'plate_text_en': ocr_result['english'],
+                            'plate_text_ar': ocr_result['arabic'],
+                            'ocr_confidence': ocr_result['confidence'],
+                            'image_path': path
+                        })
+                        print(f"Plate #{tid} ({count}/{self.max_plate_detections}): {filename} -> {plate_text}")
         
         return results
 
