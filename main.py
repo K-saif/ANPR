@@ -11,7 +11,7 @@ def parse_args():
     # Source/output
     p.add_argument("--source", required=True, help="Video path or 'webcam'")
     p.add_argument("--output", help="Output video path")
-    p.add_argument("--show", action="store_true", help="Display output")
+    p.add_argument("--show", type=lambda x: x.lower() == 'true', default=False, help="Display output (true/false)")
     
     # Model settings
     p.add_argument("--model", default=DEFAULT_MODEL_PATH, help="Vehicle model path")
@@ -19,7 +19,7 @@ def parse_args():
     p.add_argument("--confidence", type=float, default=0.5, help="Vehicle confidence")
     p.add_argument("--plate-confidence", type=float, default=0.2, help="Plate confidence")
     p.add_argument("--input-size", type=int, nargs=2, default=[384, 384], help="Input size")
-    p.add_argument("--cpu", action="store_true", help="Force CPU")
+    p.add_argument("--gpu", type=lambda x: x.lower() == 'true', default=False, help="Use GPU acceleration (true/false)")
     
     # Tracking
     p.add_argument("--track-thresh", type=float, default=0.25)
@@ -42,7 +42,7 @@ def main():
         model_path=args.model,
         confidence=args.confidence,
         input_size=tuple(args.input_size),
-        use_gpu=not args.cpu,
+        use_gpu=args.gpu,
         track_thresh=args.track_thresh,
         track_buffer=args.track_buffer,
         match_thresh=args.match_thresh,

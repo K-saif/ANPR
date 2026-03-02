@@ -7,12 +7,14 @@ supervision==0.27.0.post1
 torch==2.10.0
 torchvision==0.25.0
 
-# ONNX Runtime
+# ONNX Runtime (use onnxruntime for CPU-only, onnxruntime-gpu for GPU)
 onnxruntime==1.23.2
+# onnxruntime-gpu==1.23.2  # Uncomment for GPU support
 onnx==1.19.1
 
 # OCR
 paddlepaddle==2.6.2
+# paddlepaddle-gpu==2.6.2  # Uncomment for GPU support
 paddleocr==2.7.0.3
 
 # Image Processing

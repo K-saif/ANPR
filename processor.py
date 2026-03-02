@@ -6,7 +6,7 @@ from collections import defaultdict
 
 from vehicle_tracker import VehicleTracker
 from plate_detector import PlateDetector
-from plate_ocr import PlateOCR
+from ocr_worker import get_ocr_worker, shutdown_ocr_worker
 from visualizer import Visualizer
 from config import (
     DEFAULT_MODEL_PATH, DEFAULT_PLATE_MODEL_PATH,
@@ -40,7 +40,12 @@ class VideoProcessor:
                 self.plate_detector = PlateDetector(
                     plate_model, plate_confidence, input_size, use_gpu
                 )
-                self.plate_ocr = PlateOCR(use_gpu=use_gpu)
+                # Initialize parallel OCR worker
+                self.ocr_worker = get_ocr_worker(
+                    output_csv=os.path.join(cropped_folder, "ocr_results.csv"),
+                    use_gpu=use_gpu
+                )
+                self.ocr_worker.start()
                 os.makedirs(cropped_folder, exist_ok=True)
             except Exception as e:
                 print(f"Plate detector unavailable: {e}")
@@ -81,20 +86,21 @@ class VideoProcessor:
                         path = os.path.join(self.cropped_folder, filename)
                         cv2.imwrite(path, plate_crop)
                         
-                        # Run OCR to extract plate text (Arabic + English)
-                        ocr_result = self.plate_ocr.extract_text(plate_crop)
-                        plate_text = ocr_result['text']
+                        # Submit to parallel OCR worker (non-blocking)
+                        self.ocr_worker.submit(
+                            image=plate_crop,
+                            tracker_id=tid,
+                            frame_num=frame_num,
+                            vehicle_box=[x1, y1, x2, y2],
+                            image_path=path
+                        )
                         
                         results.append({
                             'tracker_id': tid,
                             'vehicle_box': [x1, y1, x2, y2],
-                            'plate_text': plate_text,
-                            'plate_text_en': ocr_result['english'],
-                            'plate_text_ar': ocr_result['arabic'],
-                            'ocr_confidence': ocr_result['confidence'],
                             'image_path': path
                         })
-                        print(f"Plate #{tid} ({count}/{self.max_plate_detections}): {filename} -> {plate_text}")
+                        print(f"Plate #{tid} ({count}/{self.max_plate_detections}): {filename}")
         
         return results
 
@@ -162,6 +168,10 @@ class VideoProcessor:
             if writer:
                 writer.release()
             cv2.destroyAllWindows()
+            # Shutdown OCR worker and wait for pending tasks
+            if self.enable_plates and hasattr(self, 'ocr_worker'):
+                print("Waiting for OCR to complete...")
+                shutdown_ocr_worker(wait=True)
         
         self._print_summary(frame_num, all_tracks, output_path)
 
@@ -205,6 +215,10 @@ class VideoProcessor:
         finally:
             cap.release()
             cv2.destroyAllWindows()
+            # Shutdown OCR worker and wait for pending tasks
+            if self.enable_plates and hasattr(self, 'ocr_worker'):
+                print("Waiting for OCR to complete...")
+                shutdown_ocr_worker(wait=True)
         
         print(f"Total vehicles tracked: {len(all_tracks)}")
 
@@ -219,4 +233,5 @@ class VideoProcessor:
             print(f"Output: {output_path}")
         if self.enable_plates:
             print(f"Plates folder: {self.cropped_folder}")
+            print(f"OCR results: {os.path.join(self.cropped_folder, 'ocr_results.csv')}")
         print('='*40)

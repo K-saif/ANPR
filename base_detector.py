@@ -9,11 +9,21 @@ class BaseDetector:
     """Base class for ONNX-based object detectors."""
     
     def __init__(self, model_path, confidence_threshold=0.5,
-                 input_size=(384, 384), use_gpu=True):
+                 input_size=(384, 384), use_gpu=False):
         self.confidence_threshold = confidence_threshold
         self.input_size = input_size
         
-        providers = ['CUDAExecutionProvider', 'CPUExecutionProvider'] if use_gpu else ['CPUExecutionProvider']
+        # Select providers based on GPU flag and availability
+        if use_gpu:
+            available = ort.get_available_providers()
+            if 'CUDAExecutionProvider' in available:
+                providers = ['CUDAExecutionProvider', 'CPUExecutionProvider']
+            else:
+                print("Warning: CUDA not available, falling back to CPU")
+                providers = ['CPUExecutionProvider']
+        else:
+            providers = ['CPUExecutionProvider']
+        
         self.session = ort.InferenceSession(model_path, providers=providers)
         
         self.input_name = self.session.get_inputs()[0].name
