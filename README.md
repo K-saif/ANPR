@@ -1,6 +1,6 @@
 # ANPR - Automatic Number Plate Recognition
 
-A real-time vehicle detection, tracking, and license plate recognition system using ONNX models with PaddleOCR for Arabic and English text extraction.
+A real-time vehicle detection, tracking, and license plate recognition system using ONNX models based on RF-DETR with PaddleOCR for Arabic and English text extraction.
 
 ## Features
 
@@ -53,22 +53,22 @@ python main.py --source webcam --show true
 
 | Argument | Default | Description |
 |----------|---------|-------------|
-| `--source` | *required* | Video file path or `webcam` |
-| `--output` | None | Output video path |
-| `--show` | false | Display output window (true/false) |
-| `--gpu` | false | Use GPU acceleration (true/false) |
-| `--model` | `output/inference_model.onnx` | Vehicle detection model |
-| `--plate-model` | `output/licence_plate_inference_model.onnx` | Plate detection model |
-| `--confidence` | 0.5 | Vehicle detection confidence |
-| `--plate-confidence` | 0.2 | Plate detection confidence |
-| `--input-size` | 384 384 | Model input dimensions |
-| `--track-thresh` | 0.25 | Tracking activation threshold |
-| `--track-buffer` | 30 | Lost track buffer (frames) |
-| `--match-thresh` | 0.8 | Tracking match threshold |
-| `--no-trace` | false | Disable trajectory visualization |
-| `--no-plates` | false | Disable plate detection |
-| `--cropped-folder` | `cropped/` | Folder for plate crops |
-| `--max-plates` | 3 | Max plate detections per vehicle |
+| `source` | *required* | Video file path or `webcam` |
+| `output` | None | Output video path |
+| `show` | false | Display output window (true/false) |
+| `gpu` | false | Use GPU acceleration (true/false) |
+| `model` | `output/inference_model.onnx` | Vehicle detection model |
+| `plate-model` | `output/licence_plate_inference_model.onnx` | Plate detection model |
+| `confidence` | 0.5 | Vehicle detection confidence |
+| `plate-confidence` | 0.2 | Plate detection confidence |
+| `input-size` | 384 384 | Model input dimensions |
+| `track-thresh` | 0.25 | Tracking activation threshold |
+| `track-buffer` | 30 | Lost track buffer (frames) |
+| `match-thresh` | 0.8 | Tracking match threshold |
+| `no-trace` | false | Disable trajectory visualization |
+| `no-plates` | false | Disable plate detection |
+| `cropped-folder` | `cropped/` | Folder for plate crops |
+| `max-plates` | 3 | Max plate detections per vehicle |
 
 ### Process Existing Cropped Plates
 
@@ -157,37 +157,37 @@ See `requirements.txt` for full dependencies.
 ## Workflow
 
 ```
-Video Frame
-    │
-    ▼
-┌─────────────────┐
-│ Vehicle Detection│  (RF-DETR ONNX)
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│  ByteTrack      │  (Multi-object tracking)
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Zone Filter     │  (Bottom half of frame)
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Plate Detection │  (ONNX, max 3 per vehicle)
-└────────┬────────┘
-         │
-         ├──► Save cropped image
-         │
-         ▼
-┌─────────────────┐
-│ Parallel OCR    │  (PaddleOCR: Arabic + English)
-└────────┬────────┘
-         │
-         ▼
-    CSV Results
+         Video Frame
+               │
+               ▼
+┌───────────────────────┐
+   Vehicle Detection│  (RF-DETR ONNX)
+└────────┬──────────────┘
+               │
+               ▼
+┌────────────────────────────┐
+    ByteTrack      │  (Multi-object tracking)
+└────────┬───────────────────┘
+               │
+               ▼
+┌────────────────────────────┐
+    Zone Filter     │  (Bottom half of frame)
+└────────┬───────────────────┘
+               │
+               ▼
+┌─────────────────────────────┐
+   Plate Detection │  (ONNX, max 3 per vehicle)
+└────────┬────────────────────┘
+               │
+               ├──► Save cropped image
+               │
+               ▼
+┌────────────────────────────────┐
+   Parallel OCR    │  (PaddleOCR: Arabic + English)
+└────────┬───────────────────────┘
+               |
+               ▼
+          CSV Results
 ```
 
 ## License
