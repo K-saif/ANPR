@@ -157,9 +157,9 @@ See `requirements.txt` for full dependencies.
 ## Workflow
 
 ```
-Video Frame
-    │
-    ▼
+    Video Frame
+        │
+        ▼
 ┌─────────────────┐
 │Vehicle Detection│  (RF-DETR ONNX)
 └────────┬────────┘
