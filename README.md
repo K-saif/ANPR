@@ -1,12 +1,12 @@
 # ANPR - Automatic Number Plate Recognition
 
-A real-time vehicle detection, tracking, and license plate recognition system using ONNX models based on RF-DETR with PaddleOCR for Arabic and English text extraction.
+A real-time vehicle detection, tracking, and license plate recognition system based on RF-DETR with PaddleOCR for Arabic and English text extraction.
 
 ## Features
 
-- **Vehicle Detection**: RF-DETR based detection for cars, motorcycles, buses, and trucks
+- **Vehicle Detection**: RF-DETR based detection exported to ONNX for cars, motorcycles, buses, and trucks
 - **Multi-Object Tracking**: ByteTrack for robust vehicle tracking across frames
-- **License Plate Detection**: Dedicated ONNX model for plate localization
+- **License Plate Detection**: Fine-tuned RF-DETR model and exported to ONNX for plate localization
 - **Dual-Language OCR**: PaddleOCR with Arabic and English support
 - **Parallel Processing**: Non-blocking OCR runs in background threads
 - **Zone-Based Detection**: Plates detected only in configurable regions (bottom half by default)
