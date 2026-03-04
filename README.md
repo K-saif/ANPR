@@ -157,37 +157,37 @@ See `requirements.txt` for full dependencies.
 ## Workflow
 
 ```
-         Video Frame
-               │
-               ▼
-┌───────────────────────┐
-   Vehicle Detection│  (RF-DETR ONNX)
-└────────┬──────────────┘
-               │
-               ▼
-┌────────────────────────────┐
-    ByteTrack      │  (Multi-object tracking)
-└────────┬───────────────────┘
-               │
-               ▼
-┌────────────────────────────┐
-    Zone Filter     │  (Bottom half of frame)
-└────────┬───────────────────┘
-               │
-               ▼
-┌─────────────────────────────┐
-   Plate Detection │  (ONNX, max 3 per vehicle)
-└────────┬────────────────────┘
-               │
-               ├──► Save cropped image
-               │
-               ▼
-┌────────────────────────────────┐
-   Parallel OCR    │  (PaddleOCR: Arabic + English)
-└────────┬───────────────────────┘
-               |
-               ▼
-          CSV Results
+Video Frame
+    │
+    ▼
+┌─────────────────┐
+│Vehicle Detection│  (RF-DETR ONNX)
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│  ByteTrack      │  (Multi-object tracking)
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Zone Filter     │  (Bottom half of frame)
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Plate Detection │  (ONNX, max 3 per vehicle)
+└────────┬────────┘
+         │
+         ├──► Save cropped image
+         │
+         ▼
+┌─────────────────┐
+│ Parallel OCR    │  (PaddleOCR: Arabic + English)
+└────────┬────────┘
+         │
+         ▼
+    CSV Results
 ```
 
 ## License
